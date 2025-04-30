@@ -149,14 +149,13 @@ pub mod tournament_component {
             self._is_token_registered(@token)
         }
 
-        // TODO: remove safe mode block for V2 (use Ekubo tokens)
         fn register_token(
             ref self: ComponentState<TContractState>,
             address: ContractAddress,
             token_type: TokenType,
         ) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), @"tournament",
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
             let safe_mode = store.get_tournament_config(VERSION).safe_mode;
