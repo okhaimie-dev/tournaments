@@ -225,7 +225,7 @@ const Details = ({ form }: StepProps) => {
                       <div className="space-y-2">
                         <Slider
                           min={1}
-                          max={100}
+                          max={255}
                           step={1}
                           value={[field.value]}
                           onValueChange={(value) => field.onChange(value[0])}

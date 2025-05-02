@@ -115,7 +115,7 @@ export const processTournamentData = (
     },
     game_config: {
       address: addAddressPadding(formData.game),
-      settings_id: 0,
+      settings_id: formData.settings,
       prize_spots: formData.leaderboardSize,
     },
     entry_fee: formData.enableEntryFees

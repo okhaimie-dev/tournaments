@@ -53,11 +53,13 @@ const TournamentConfirmation = ({
   const { data: settings } = useGetGameSettings({
     namespace: gameNamespace ?? "",
     settingsModel: gameSettingsModel ?? "",
+    active: true,
   });
 
   const { data: settingsDetails } = useGetGameSettings({
     namespace: gameNamespace ?? "",
     settingsModel: "GameSettingsMetadata",
+    active: gameNamespace === "ds_v1_2_0",
   });
 
   const mergedGameSettings = mergeGameSettings(settingsDetails, settings);
