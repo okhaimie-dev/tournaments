@@ -233,7 +233,7 @@ const Details = ({ form }: StepProps) => {
                         />
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>1</span>
-                          <span>100</span>
+                          <span>255</span>
                         </div>
                       </div>
                     </div>
