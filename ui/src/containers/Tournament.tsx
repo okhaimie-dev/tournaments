@@ -124,7 +124,7 @@ const Tournament = () => {
   }, [id, tournamentsCount]);
 
   useGetTournamentQuery(addAddressPadding(bigintToHex(id!)), namespace);
-  useSubscribeTournamentQuery(addAddressPadding(bigintToHex(id!)), namespace);
+  // useSubscribeTournamentQuery(addAddressPadding(bigintToHex(id!)), namespace);
 
   const tournamentEntityId = useMemo(
     () => getEntityIdFromKeys([BigInt(id!)]),

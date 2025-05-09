@@ -4,6 +4,7 @@ import {
   useGetTokensQuery,
   useGetMetricsQuery,
   useSubscribeMetricsQuery,
+  useSubscribeTournamentsQuery,
 } from "@/dojo/hooks/useSdkQueries";
 import { Toaster } from "@/components/ui/toaster";
 import { useEffect, useMemo, useRef, useState, Suspense, lazy } from "react";
@@ -46,6 +47,7 @@ function App() {
   useGetTokensQuery(namespace);
   useGetMetricsQuery(namespace);
   useSubscribeMetricsQuery(namespace);
+  useSubscribeTournamentsQuery(namespace);
 
   const { data: gameNamespaces } = useGetgameNamespaces();
 
