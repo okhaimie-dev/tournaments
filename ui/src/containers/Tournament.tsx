@@ -22,7 +22,6 @@ import {
   useSubscribeGamesQuery,
   // useGetGameCounterQuery,
   useGetTournamentQuery,
-  useSubscribeTournamentQuery,
   useSubscribeScoresQuery,
   useGetScoresQuery,
 } from "@/dojo/hooks/useSdkQueries";
