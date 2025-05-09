@@ -33,7 +33,6 @@ import { TournamentCard } from "@/components/overview/TournamanentCard";
 import TournamentSkeletons from "@/components/overview/TournamentSkeletons";
 import NoAccount from "@/components/overview/tournaments/NoAccount";
 import { useAccount, useNetwork } from "@starknet-react/core";
-import { useSubscribeTournamentsQuery } from "@/dojo/hooks/useSdkQueries";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { ParsedEntity } from "@dojoengine/sdk";
 import { SchemaType } from "@/generated/models.gen";
@@ -103,10 +102,13 @@ const Overview = () => {
   const subscribedTournaments = useDojoStore((state) =>
     state.getEntitiesByModel(namespace, "Tournament")
   );
-  const subscribedTournamentsKey = useMemo(
-    () => JSON.stringify(subscribedTournaments),
-    [subscribedTournaments]
-  );
+
+  const subscribedTournamentsKey = useMemo(() => {
+    // Just use the length and a simple hash of IDs
+    return `${subscribedTournaments.length}-${subscribedTournaments
+      .map((t) => t.entityId.toString())
+      .join(",")}`;
+  }, [subscribedTournaments]);
 
   const [prevSubscribedTournaments, setPrevSubscribedTournaments] = useState<
     ParsedEntity<SchemaType>[] | null
@@ -236,7 +238,7 @@ const Overview = () => {
     active: ["upcoming", "live", "ended"].includes(selectedTab) && shouldFetch,
   });
 
-  useSubscribeTournamentsQuery(namespace);
+  // useSubscribeTournamentsQuery(namespace);
 
   useEffect(() => {
     if (

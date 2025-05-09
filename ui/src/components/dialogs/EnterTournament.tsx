@@ -114,7 +114,7 @@ export function EnterTournamentDialog({
         // gameCount
         duration,
         entryFeeUsdCost,
-        Number(entryCountModel?.count) ?? 0
+        Number(entryCountModel?.count ?? 0)
       );
 
       setPlayerName("");
