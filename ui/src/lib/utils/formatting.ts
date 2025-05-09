@@ -49,7 +49,7 @@ export const processTournamentData = (
     switch (formData.gatingOptions.type) {
       case "token":
         entryRequirementType = new CairoCustomEnum({
-          token: formData.gatingOptions.token,
+          token: formData.gatingOptions.token?.address,
           tournament: undefined,
           allowlist: undefined,
         });
