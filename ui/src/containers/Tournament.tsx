@@ -453,7 +453,6 @@ const Tournament = () => {
           <EntryRequirements
             tournamentModel={tournamentModel}
             tournamentsData={tournamentsData}
-            tokens={tokens}
           />
           {!isEnded && (
             <Button
