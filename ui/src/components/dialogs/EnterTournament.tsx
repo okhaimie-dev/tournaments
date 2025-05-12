@@ -95,11 +95,12 @@ export function EnterTournamentDialog({
   const handleEnterTournament = async () => {
     setIsEntering(true);
     try {
-      if (!playerName.trim()) return;
+      if (!playerName.trim() || !address) return;
 
       const qualificationProof = processQualificationProof(
         requirementVariant ?? "",
-        proof
+        proof,
+        address
       );
 
       await approveAndEnterTournament(
