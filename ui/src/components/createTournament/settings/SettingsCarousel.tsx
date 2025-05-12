@@ -43,11 +43,23 @@ const SettingsCarousel = ({
     );
   }
 
-  const currentSetting = settings[currentIndex];
+  const settingsArray = Array.isArray(settings)
+    ? settings
+    : Object.values(settings);
+  const fakeSettings = [
+    ...settingsArray,
+    ...settingsArray,
+    ...settingsArray,
+    ...settingsArray,
+    ...settingsArray,
+  ];
+  console.log(fakeSettings);
+
+  const currentSetting = fakeSettings[currentIndex];
 
   return (
-    <div className="space-y-4">
-      <div className="relative px-6 min-h-[200px] max-h-[600px]">
+    <div className="flex flex-col w-full">
+      <div className="relative px-6 min-h-[200px] max-h-[600px w-full">
         <div className="flex flex-col gap-2 items-center w-full">
           <TokenGameIcon size="lg" image={getGameImage(game)} />
           <div className="flex flex-col items-center">
@@ -79,7 +91,7 @@ const SettingsCarousel = ({
             size="icon"
             onClick={() =>
               setCurrentIndex((i) =>
-                Math.min(Object.values(settings).length - 1, i + 1)
+                Math.min(Object.values(fakeSettings).length - 1, i + 1)
               )
             }
             disabled={currentIndex === Object.values(settings).length - 1}
@@ -90,9 +102,9 @@ const SettingsCarousel = ({
         </div>
       </div>
 
-      <div className="flex justify-between items-center">
-        <div className="flex gap-1">
-          {Object.values(settings).map((_, i) => (
+      <div className="flex justify-between items-center border-t pt-5 border-brand w-full">
+        <div className="flex gap-1 w-3/4 overflow-x-auto">
+          {Object.values(fakeSettings).map((_, i) => (
             <div
               key={i}
               className={cn(
