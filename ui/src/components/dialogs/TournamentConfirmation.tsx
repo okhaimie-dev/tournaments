@@ -27,7 +27,7 @@ import { useMemo, useState } from "react";
 import { useDojo } from "@/context/dojo";
 // import { calculateTotalValue } from "@/lib/utils/formatting";
 import { useGetGameSettings } from "@/dojo/hooks/useSqlQueries";
-import { mergeGameSettings } from "@/lib/utils/formatting";
+import { formatGameSettingsData } from "@/lib/utils/formatting";
 import { LoadingSpinner } from "@/components/ui/spinner";
 
 interface TournamentConfirmationProps {
@@ -56,13 +56,7 @@ const TournamentConfirmation = ({
     active: true,
   });
 
-  const { data: settingsDetails } = useGetGameSettings({
-    namespace: gameNamespace ?? "",
-    settingsModel: "GameSettingsMetadata",
-    active: gameNamespace === "ds_v1_2_0",
-  });
-
-  const mergedGameSettings = mergeGameSettings(settingsDetails, settings);
+  const formattedSettings = formatGameSettingsData(settings);
 
   const hasBonusPrizes =
     formData.bonusPrizes && formData.bonusPrizes.length > 0;
@@ -82,7 +76,7 @@ const TournamentConfirmation = ({
     ],
   });
 
-  const hasSettings = mergedGameSettings[formData.settings];
+  const hasSettings = formattedSettings[formData.settings];
 
   const currentTime = BigInt(new Date().getTime()) / 1000n;
   const startTime = BigInt(formData.startTime.getTime()) / 1000n;

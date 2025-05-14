@@ -6,20 +6,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import SettingsCarousel from "./SettingsCarousel";
 import SmallSettingsTable from "./SmallSettingsTable";
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
 import { useGameEndpoints } from "@/dojo/hooks/useGameEndpoints";
 import { useGetGameSettings } from "@/dojo/hooks/useSqlQueries";
 import { feltToString } from "@/lib/utils";
-import { mergeGameSettings } from "@/lib/utils/formatting";
+import { formatGameSettingsData } from "@/lib/utils/formatting";
 import { useState } from "react";
 import { SettingsDialog } from "@/components/dialogs/Settings";
 
@@ -30,20 +22,26 @@ interface GameSettingsFieldProps {
 
 const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
   const [open, setOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
   const { gameNamespace, gameSettingsModel } = useGameEndpoints(
     form.watch("game")
   );
+
+  // const { data: rawSettings } = useGetGameSettings({
+  //   namespace: gameNamespace ?? "",
+  //   settingsModel: gameSettingsModel ?? "",
+  //   active: true,
+  //   limit: 5,
+  //   offset: (currentPage - 1) * 5,
+  // });
 
   const { data: rawSettings } = useGetGameSettings({
     namespace: gameNamespace ?? "",
     settingsModel: gameSettingsModel ?? "",
     active: true,
-  });
-
-  const { data: settingsDetails } = useGetGameSettings({
-    namespace: gameNamespace ?? "",
-    settingsModel: "GameSettingsMetadata",
-    active: gameNamespace === "ds_v1_2_0",
+    limit: 5,
+    offset: (currentPage - 1) * 5,
   });
 
   const settings = rawSettings?.map((setting) =>
@@ -55,9 +53,9 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
     }, {} as Record<string, any>)
   );
 
-  const mergedGameSettings = mergeGameSettings(settingsDetails, settings);
+  const formattedSettings = formatGameSettingsData(settings);
 
-  const hasSettings = mergedGameSettings[field.value]?.hasSettings ?? false;
+  const hasSettings = formattedSettings[field.value]?.hasSettings ?? false;
 
   return (
     <>
@@ -65,9 +63,11 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
         open={open}
         onOpenChange={setOpen}
         game={form.watch("game")}
-        settings={mergedGameSettings}
+        settings={formattedSettings}
         value={field.value}
         onChange={field.onChange}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
       />
       <FormItem>
         <div className="flex flex-row items-center gap-5">
@@ -85,27 +85,28 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
                 <div className="flex flex-col">
                   <h3 className="font-brand text-lg">
                     {hasSettings
-                      ? feltToString(
-                          mergedGameSettings[field.value]?.name ?? ""
-                        )
+                      ? feltToString(formattedSettings[field.value]?.name ?? "")
                       : "Default"}
                   </h3>
                   <p className="text-sm text-brand-muted">
                     {hasSettings
-                      ? mergedGameSettings[field.value]?.description
+                      ? formattedSettings[field.value]?.description
                       : "No settings available"}
                   </p>
                 </div>
-                <Button variant="outline" onClick={() => setOpen(true)}>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => setOpen(true)}
+                  disabled={!hasSettings}
+                >
                   Select Settings
                 </Button>
               </div>
 
               <SmallSettingsTable
-                hasSettings={
-                  mergedGameSettings[field.value]?.hasSettings ?? false
-                }
-                settings={mergedGameSettings[field.value]?.settings ?? []}
+                hasSettings={hasSettings}
+                settings={formattedSettings[field.value]?.settings ?? []}
               />
             </div>
           </div>

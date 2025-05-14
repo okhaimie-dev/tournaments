@@ -14,6 +14,8 @@ interface SettingsDialogProps {
   settings: any[];
   value: string;
   onChange: (value: string) => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
 }
 export const SettingsDialog = ({
   open,
@@ -22,6 +24,8 @@ export const SettingsDialog = ({
   settings,
   value,
   onChange,
+  currentPage,
+  setCurrentPage,
 }: SettingsDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -29,17 +33,17 @@ export const SettingsDialog = ({
         <DialogHeader>
           <DialogTitle>Game Settings</DialogTitle>
         </DialogHeader>
-        <div>
-          {game && (
-            <SettingsCarousel
-              game={game}
-              settings={settings}
-              value={value}
-              onChange={onChange}
-              setOpen={onOpenChange}
-            />
-          )}
-        </div>
+        {game && (
+          <SettingsCarousel
+            game={game}
+            settings={settings}
+            value={value}
+            onChange={onChange}
+            setOpen={onOpenChange}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
