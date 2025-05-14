@@ -688,7 +688,8 @@ export const processPrizesFromSql = (
 
 export const processQualificationProof = (
   requirementVariant: string,
-  proof: any
+  proof: any,
+  address: string
 ): CairoOption<QualificationProofEnum> => {
   if (requirementVariant === "tournament") {
     const qualificationProof = new CairoCustomEnum({
@@ -698,6 +699,7 @@ export const processQualificationProof = (
         position: proof.position,
       },
       NFT: undefined,
+      Address: undefined,
     }) as QualificationProofEnum;
     return new CairoOption(CairoOptionVariant.Some, qualificationProof);
   }
@@ -713,6 +715,18 @@ export const processQualificationProof = (
             high: "0",
           },
         },
+        Address: undefined,
+      })
+    );
+  }
+
+  if (requirementVariant === "allowlist") {
+    return new CairoOption(
+      CairoOptionVariant.Some,
+      new CairoCustomEnum({
+        Tournament: undefined,
+        NFT: undefined,
+        Address: address,
       })
     );
   }

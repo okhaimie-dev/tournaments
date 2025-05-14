@@ -1,7 +1,7 @@
 {
   "world": {
     "class_hash": "0x75fc75bcd1a7f8b4bf64b74978b0f89c8cee44bb755c1dae6f82284756451ec",
-    "address": "0x6a9e4c6f0799160ea8ddc43ff982a5f83d7f633e9732ce42701de1288ff705f",
+    "address": "0x5c6d0020a9927edca9ddc984b97305439c0b32a1ec8d3f0eaf6291074cc9799",
     "seed": "DNC",
     "name": "Realms World",
     "entrypoints": [
@@ -1312,8 +1312,8 @@
   },
   "contracts": [
     {
-      "address": "0x2349ae0d76bed65e1e2f01b824c59dc1f877a2601a35a29db80880fa015a588",
-      "class_hash": "0x12db3b0d1c60939f3a8d6582d5e66aa118bad81a2e3dfb60ffeb6969789abd9",
+      "address": "0xbcb2386436161d8d3afea0a805a8610ab90af5cf5582d866b83e9cb779bef3",
+      "class_hash": "0x15afab2fc0eafdd723306be7783987ccded87463407393c7f0ad466319561df",
       "abi": [
         {
           "type": "impl",
