@@ -38,6 +38,7 @@ import { ParsedEntity } from "@dojoengine/sdk";
 import { SchemaType } from "@/generated/models.gen";
 import useTournamentStore, { TournamentTab } from "@/hooks/tournamentStore";
 import { STARTING_TOURNAMENT_ID } from "@/lib/constants";
+import { LoadingSpinner } from "@/components/ui/spinner";
 
 const SORT_OPTIONS = {
   upcoming: [
@@ -440,10 +441,6 @@ const Overview = () => {
     setSelectedTab,
   ]);
 
-  const LoadingSpinner = () => (
-    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
-  );
-
   return (
     <div className="flex flex-row gap-5 h-full">
       <GameFilters />
@@ -570,7 +567,7 @@ const Overview = () => {
           <div ref={loadingRef} className="w-full h-10 flex justify-center">
             {isCurrentTabLoading && currentPage === 0
               ? null
-              : isCurrentTabLoading && <LoadingSpinner />}
+              : isCurrentTabLoading && <LoadingSpinner className="w-5 h-5" />}
           </div>
         </div>
       </div>

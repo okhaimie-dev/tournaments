@@ -32,6 +32,54 @@ export const useGetGamesMetadata = ({
   return { data, loading, error };
 };
 
+export const useGetGameSettingsCount = ({
+  namespace,
+  active = false,
+}: {
+  namespace: string;
+  active?: boolean;
+}) => {
+  const query = useMemo(
+    () =>
+      namespace && active
+        ? `
+    SELECT COUNT(*) as count
+    FROM '${namespace}-GameSettingsMetadata' sm
+  `
+        : null,
+    [namespace, active]
+  );
+  const { data, loading, error } = useSqlExecute(query);
+  return { data: data?.[0]?.count, loading, error };
+};
+
+export const useGetGameSetting = ({
+  namespace,
+  settingsModel,
+  settingsId,
+  active = false,
+}: {
+  namespace: string;
+  settingsModel: string;
+  settingsId?: number;
+  active?: boolean;
+}) => {
+  const query = useMemo(
+    () =>
+      namespace && settingsModel && active
+        ? `
+    SELECT s.*, sm.name, sm.description, sm.created_at, sm.created_by
+    FROM "${namespace}-${settingsModel}" s
+    LEFT JOIN '${namespace}-GameSettingsMetadata' sm ON s.settings_id = sm.settings_id
+    WHERE s.settings_id = '${settingsId}'
+  `
+        : null,
+    [namespace, settingsModel, active, settingsId]
+  );
+  const { data, loading, error } = useSqlExecute(query);
+  return { data, loading, error };
+};
+
 export const useGetGameSettings = ({
   namespace,
   settingsModel,

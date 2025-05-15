@@ -9,11 +9,16 @@ import { Button } from "@/components/ui/button";
 import SmallSettingsTable from "./SmallSettingsTable";
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
 import { useGameEndpoints } from "@/dojo/hooks/useGameEndpoints";
-import { useGetGameSettings } from "@/dojo/hooks/useSqlQueries";
+import {
+  useGetGameSetting,
+  useGetGameSettings,
+  useGetGameSettingsCount,
+} from "@/dojo/hooks/useSqlQueries";
 import { feltToString } from "@/lib/utils";
 import { formatGameSettingsData } from "@/lib/utils/formatting";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SettingsDialog } from "@/components/dialogs/Settings";
+import { LoadingSpinner } from "@/components/ui/spinner";
 
 interface GameSettingsFieldProps {
   form: UseFormReturn<any>;
@@ -23,26 +28,33 @@ interface GameSettingsFieldProps {
 const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
   const [open, setOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const settingsPerPage = 5;
 
   const { gameNamespace, gameSettingsModel } = useGameEndpoints(
     form.watch("game")
   );
 
-  // const { data: rawSettings } = useGetGameSettings({
-  //   namespace: gameNamespace ?? "",
-  //   settingsModel: gameSettingsModel ?? "",
-  //   active: true,
-  //   limit: 5,
-  //   offset: (currentPage - 1) * 5,
-  // });
+  const { data: settingsCount } = useGetGameSettingsCount({
+    namespace: gameNamespace ?? "",
+    active: true,
+  });
 
-  const { data: rawSettings } = useGetGameSettings({
+  const { data: rawSetting, loading: isLoadingSetting } = useGetGameSetting({
+    namespace: gameNamespace ?? "",
+    settingsModel: gameSettingsModel ?? "",
+    settingsId: Number(field.value),
+    active: true,
+  });
+
+  const { data: rawSettings, loading: isLoadingSettings } = useGetGameSettings({
     namespace: gameNamespace ?? "",
     settingsModel: gameSettingsModel ?? "",
     active: true,
-    limit: 5,
-    offset: (currentPage - 1) * 5,
+    limit: settingsPerPage,
+    offset: (currentPage - 1) * settingsPerPage,
   });
+
+  const totalPages = Math.ceil(settingsCount / settingsPerPage);
 
   const settings = rawSettings?.map((setting) =>
     Object.entries(setting).reduce((acc, [key, value]) => {
@@ -52,10 +64,25 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
       return acc;
     }, {} as Record<string, any>)
   );
+  const setting = rawSetting?.map((setting) =>
+    Object.entries(setting).reduce((acc, [key, value]) => {
+      if (!key.includes("internal")) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as Record<string, any>)
+  );
 
   const formattedSettings = formatGameSettingsData(settings);
+  const formattedSetting = formatGameSettingsData(setting);
 
-  const hasSettings = formattedSettings[field.value]?.hasSettings ?? false;
+  const hasSettings = formattedSetting[field.value]?.hasSettings ?? false;
+
+  useEffect(() => {
+    if (open) {
+      setCurrentPage(1);
+    }
+  }, [open]);
 
   return (
     <>
@@ -68,6 +95,9 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
         onChange={field.onChange}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
+        settingsCount={settingsCount}
+        totalPages={totalPages}
+        isLoadingSettings={isLoadingSettings}
       />
       <FormItem>
         <div className="flex flex-row items-center gap-5">
@@ -85,12 +115,12 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
                 <div className="flex flex-col">
                   <h3 className="font-brand text-lg">
                     {hasSettings
-                      ? feltToString(formattedSettings[field.value]?.name ?? "")
+                      ? feltToString(formattedSetting[field.value]?.name ?? "")
                       : "Default"}
                   </h3>
                   <p className="text-sm text-brand-muted">
                     {hasSettings
-                      ? formattedSettings[field.value]?.description
+                      ? formattedSetting[field.value]?.description
                       : "No settings available"}
                   </p>
                 </div>
@@ -98,16 +128,19 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
                   variant="outline"
                   type="button"
                   onClick={() => setOpen(true)}
-                  disabled={!hasSettings}
+                  disabled={!form.watch("game")}
                 >
                   Select Settings
                 </Button>
               </div>
-
-              <SmallSettingsTable
-                hasSettings={hasSettings}
-                settings={formattedSettings[field.value]?.settings ?? []}
-              />
+              {isLoadingSetting ? (
+                <LoadingSpinner className="w-10 h-10 border-brand" />
+              ) : (
+                <SmallSettingsTable
+                  hasSettings={hasSettings}
+                  settings={formattedSetting[field.value]?.settings ?? []}
+                />
+              )}
             </div>
           </div>
         </FormControl>
