@@ -69,7 +69,7 @@ export const useGetGameSetting = ({
       namespace && settingsModel && active
         ? `
     SELECT s.*, sm.name, sm.description, sm.created_at, sm.created_by
-    FROM "${namespace}-${settingsModel}" s
+    FROM '${namespace}-${settingsModel}' s
     LEFT JOIN '${namespace}-GameSettingsMetadata' sm ON s.settings_id = sm.settings_id
     WHERE s.settings_id = '${settingsId}'
   `
@@ -98,7 +98,7 @@ export const useGetGameSettings = ({
       namespace && settingsModel && active
         ? `
     SELECT s.*, sm.name, sm.description, sm.created_at, sm.created_by
-    FROM "${namespace}-${settingsModel}" s
+    FROM '${namespace}-${settingsModel}' s
     LEFT JOIN '${namespace}-GameSettingsMetadata' sm ON s.settings_id = sm.settings_id
     LIMIT ${limit}
     OFFSET ${offset}

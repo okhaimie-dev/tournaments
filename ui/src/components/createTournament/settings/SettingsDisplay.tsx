@@ -7,7 +7,6 @@ interface SettingsDisplayProps {
   currentSettingId: number;
   onChange: (value: string) => void;
   setOpen: (value: boolean) => void;
-  currentIndex: number;
   value: string;
   close: () => void;
   setSelectedSetting: (value: number | null) => void;
@@ -18,11 +17,11 @@ const SettingsDisplay = ({
   currentSettingId,
   onChange,
   setOpen,
-  currentIndex,
   value,
   close,
   setSelectedSetting,
 }: SettingsDisplayProps) => {
+  const isSelected = currentSettingId === Number(value);
   return (
     <div className="relative flex flex-col gap-2 border border-brand-subtle rounded-lg p-5">
       <div className="absolute -top-12 left-0">
@@ -45,10 +44,10 @@ const SettingsDisplay = ({
           setOpen(false);
           setSelectedSetting(null);
         }}
-        disabled={currentSettingId === Number(value)}
+        disabled={isSelected}
         className="flex items-center justify-center"
       >
-        {currentIndex === Number(value) ? "Selected" : "Select"}
+        {isSelected ? "Selected" : "Select"}
       </Button>
     </div>
   );

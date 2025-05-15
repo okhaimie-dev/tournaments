@@ -89,7 +89,6 @@ export const SettingsDialog = ({
                 currentSettingId={selectedSetting}
                 onChange={onChange}
                 setOpen={onOpenChange}
-                currentIndex={currentPage}
                 value={value}
                 close={() => setSelectedSetting(null)}
                 setSelectedSetting={setSelectedSetting}

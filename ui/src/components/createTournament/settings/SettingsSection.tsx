@@ -54,7 +54,7 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
     offset: (currentPage - 1) * settingsPerPage,
   });
 
-  const totalPages = Math.ceil(settingsCount / settingsPerPage);
+  const totalPages = Math.ceil((settingsCount ?? 0) / settingsPerPage);
 
   const settings = rawSettings?.map((setting) =>
     Object.entries(setting).reduce((acc, [key, value]) => {
