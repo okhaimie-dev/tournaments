@@ -800,11 +800,11 @@ const getTournamentQualificationWhereClause = (
 
       switch (type) {
         case "token":
-          return `(qe.'qualification_proof.token.token_id' = '${tokenId}')`;
+          return `(qe.'qualification_proof.NFT.token_id' = '${tokenId}')`;
         case "tournament":
-          return `(qe.'qualification_proof.tournament.tournament_id' = '${tournamentId}' AND qe.'qualification_proof.tournament.token_id' = '${gameId}' AND qe.'qualification_proof.tournament.position' = ${position})`;
+          return `(qe.'qualification_proof.Tournament.tournament_id' = '${tournamentId}' AND qe.'qualification_proof.Tournament.token_id' = '${gameId}' AND qe.'qualification_proof.Tournament.position' = ${position})`;
         case "allowlist":
-          return `(qe.'qualification_proof.allowlist' = '${address}')`;
+          return `(qe.'qualification_proof.Address' = '${address}')`;
         default:
           return null;
       }
