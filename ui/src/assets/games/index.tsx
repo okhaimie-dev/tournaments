@@ -81,10 +81,11 @@ export const getGames = (): Game[] => {
         controllerOnly: true,
       },
       {
-        contract_address: "0x1234",
+        contract_address:
+          "0x04fd5df500e6c6615e4423258639f189455672bc841ba58f1c781ac7c5ff4bd8",
         name: "0x7a4b756265",
-        image: "https://zkube.vercel.app/assets/pwa-512x512.png",
-        url: "https://zkube.vercel.app",
+        image: "https://app.zkube.xyz/assets/pwa-512x512.png",
+        url: "https://app.zkube.xyz/",
         controllerOnly: true,
       },
     ];

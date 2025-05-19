@@ -21,7 +21,6 @@ import { getGames } from "./assets/games";
 import Header from "@/components/Header";
 import LoadingPage from "@/containers/LoadingPage";
 import { useResetDojoOnNetworkChange } from "@/dojo/hooks/useResetDojoOnNetworkChange";
-import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 
 const NotFound = lazy(() => import("@/containers/NotFound"));
 const Overview = lazy(() => {
@@ -39,8 +38,6 @@ const CreateTournament = lazy(() => import("@/containers/CreateTournament"));
 function App() {
   const { namespace } = useDojo();
   const { setGameData, setGameDataLoading } = useUIStore();
-  const state = useDojoStore((state) => state);
-  console.log(state);
 
   useResetDojoOnNetworkChange();
 
