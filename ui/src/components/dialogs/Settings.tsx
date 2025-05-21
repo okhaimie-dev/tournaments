@@ -41,8 +41,10 @@ export const SettingsDialog = ({
 
   const [selectedSetting, setSelectedSetting] = useState<number | null>(null);
 
+  const noSettings = !Object.values(settings)?.length;
+
   const noSettingsDisplay = () => {
-    if (!Object.values(settings)?.length) {
+    if (noSettings) {
       return (
         <div className="space-y-4">
           <div className="flex flex-col items-center justify-center text-center gap-2 text-muted-foreground">
@@ -64,37 +66,40 @@ export const SettingsDialog = ({
           <DialogTitle>Game Settings</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col w-full">
-          {noSettingsDisplay()}
-          <div className="relative flex flex-col gap-2 h-[500px] w-full">
-            <div className="flex flex-col gap-2 items-center w-full">
-              <TokenGameIcon size="lg" image={getGameImage(game)} />
-              <h3 className="text-2xl font-brand">{getGameName(game)}</h3>
+          {noSettings ? (
+            noSettingsDisplay()
+          ) : (
+            <div className="relative flex flex-col gap-2 h-[500px] w-full">
+              <div className="flex flex-col gap-2 items-center w-full">
+                <TokenGameIcon size="lg" image={getGameImage(game)} />
+                <h3 className="text-2xl font-brand">{getGameName(game)}</h3>
+              </div>
+              {selectedSetting === null ? (
+                <SettingsCarousel
+                  game={game}
+                  settings={settings}
+                  value={value}
+                  setOpen={onOpenChange}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  setSelectedSetting={setSelectedSetting}
+                  settingsCount={settingsCount}
+                  totalPages={totalPages}
+                  isLoadingSettings={isLoadingSettings}
+                />
+              ) : (
+                <SettingsDisplay
+                  currentSetting={settings[selectedSetting]}
+                  currentSettingId={selectedSetting}
+                  onChange={onChange}
+                  setOpen={onOpenChange}
+                  value={value}
+                  close={() => setSelectedSetting(null)}
+                  setSelectedSetting={setSelectedSetting}
+                />
+              )}
             </div>
-            {selectedSetting === null ? (
-              <SettingsCarousel
-                game={game}
-                settings={settings}
-                value={value}
-                setOpen={onOpenChange}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                setSelectedSetting={setSelectedSetting}
-                settingsCount={settingsCount}
-                totalPages={totalPages}
-                isLoadingSettings={isLoadingSettings}
-              />
-            ) : (
-              <SettingsDisplay
-                currentSetting={settings[selectedSetting]}
-                currentSettingId={selectedSetting}
-                onChange={onChange}
-                setOpen={onOpenChange}
-                value={value}
-                close={() => setSelectedSetting(null)}
-                setSelectedSetting={setSelectedSetting}
-              />
-            )}
-          </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
