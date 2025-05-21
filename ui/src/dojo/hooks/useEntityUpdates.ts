@@ -13,12 +13,16 @@ export const useEntityUpdates = () => {
     const platformMetricsEntityId = getEntityIdFromKeys([
       BigInt(TOURNAMENT_VERSION_KEY),
     ]);
-    await state.waitForEntityChange(platformMetricsEntityId, (entity) => {
-      return (
-        entity?.models?.[namespace]?.PlatformMetrics?.total_tournaments ==
-        addAddressPadding(bigintToHex(BigInt(Number(totalTournaments))))
-      );
-    });
+    await state.waitForEntityChange(
+      platformMetricsEntityId,
+      (entity) => {
+        return (
+          entity?.models?.[namespace]?.PlatformMetrics?.total_tournaments ==
+          addAddressPadding(bigintToHex(BigInt(Number(totalTournaments))))
+        );
+      },
+      20000
+    );
   };
 
   const waitForTournamentEntry = async (
@@ -26,33 +30,45 @@ export const useEntityUpdates = () => {
     entryCount: number
   ) => {
     const entryCountEntityId = getEntityIdFromKeys([BigInt(tournamentId)]);
-    await state.waitForEntityChange(entryCountEntityId, (entity) => {
-      return (
-        entity?.models?.[namespace]?.EntryCount?.count ==
-        addAddressPadding(bigintToHex(BigInt(Number(entryCount) + 1)))
-      );
-    });
+    await state.waitForEntityChange(
+      entryCountEntityId,
+      (entity) => {
+        return (
+          entity?.models?.[namespace]?.EntryCount?.count ==
+          addAddressPadding(bigintToHex(BigInt(Number(entryCount) + 1)))
+        );
+      },
+      20000
+    );
   };
 
   const waitForAddPrizes = async (prizeCount: number) => {
     const prizeMetricsEntityId = getEntityIdFromKeys([
       BigInt(TOURNAMENT_VERSION_KEY),
     ]);
-    await state.waitForEntityChange(prizeMetricsEntityId, (entity) => {
-      return (
-        entity?.models?.[namespace]?.PrizeMetrics?.total_prizes ==
-        addAddressPadding(bigintToHex(BigInt(prizeCount)))
-      );
-    });
+    await state.waitForEntityChange(
+      prizeMetricsEntityId,
+      (entity) => {
+        return (
+          entity?.models?.[namespace]?.PrizeMetrics?.total_prizes ==
+          addAddressPadding(bigintToHex(BigInt(prizeCount)))
+        );
+      },
+      20000
+    );
   };
 
   const waitForSubmitScores = async (tournamentId: BigNumberish) => {
     const tournamentLeaderboardEntityId = getEntityIdFromKeys([
       BigInt(tournamentId),
     ]);
-    await state.waitForEntityChange(tournamentLeaderboardEntityId, () => {
-      return true;
-    });
+    await state.waitForEntityChange(
+      tournamentLeaderboardEntityId,
+      () => {
+        return true;
+      },
+      20000
+    );
   };
 
   return {
