@@ -1,5 +1,5 @@
 import { TournamentFormData } from "@/containers/CreateTournament";
-import { bigintToHex, stringToFelt } from "@/lib/utils";
+import { bigintToHex, indexAddress, stringToFelt } from "@/lib/utils";
 import {
   addAddressPadding,
   CairoOption,
@@ -405,7 +405,9 @@ export const groupPrizesByPositions = (prizes: Prize[], tokens: Token[]) => {
     .sort((a, b) => Number(a.payout_position) - Number(b.payout_position))
     .reduce((acc, prize) => {
       const position = prize.payout_position.toString();
-      const tokenModel = tokens.find((t) => t.address === prize.token_address);
+      const tokenModel = tokens.find(
+        (t) => indexAddress(t.address) === indexAddress(prize.token_address)
+      );
 
       if (!tokenModel?.symbol) {
         console.warn(`No token model found for address ${prize.token_address}`);
