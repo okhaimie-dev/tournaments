@@ -28,9 +28,6 @@ namespaces = ["ds_v1_2_0", "budokan_1_0_7", "zkube_budo_v1_1_0"]
 world_block = 1355127 # Eternum Season 1 Pass deployment block - 1
 #https://voyager.online/tx/0x3ffdcecd7357033b2b2ac7bbe0c290555190dd79edec6e19f529df498243b32
 
-[erc]
-max_metadata_tasks = 5
-
 [sql]
 all_model_indices = false
 historical = ["ds_v1_2_0-TrophyCreation", "ds_v1_2_0-TrophyProgression"]
