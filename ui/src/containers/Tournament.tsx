@@ -132,7 +132,7 @@ const Tournament = () => {
 
   const tournamentModel = state.getEntity(tournamentEntityId)?.models[namespace]
     ?.Tournament as TournamentModel;
-
+    
   const entryCountModel = useModel(
     tournamentEntityId,
     getModelsMapping(namespace).EntryCount

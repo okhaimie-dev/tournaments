@@ -4,9 +4,9 @@ import { useSdkSubscribeEntities } from "@/lib/dojo/hooks/useSdkSub";
 import {
   ToriiQueryBuilder,
   KeysClause,
-  ClauseBuilder,
   MemberClause,
   AndComposeClause,
+  OrComposeClause,
 } from "@dojoengine/sdk";
 import { getModelsMapping } from "@/generated/models.gen";
 import { addAddressPadding, BigNumberish } from "starknet";
@@ -67,17 +67,7 @@ export const useGetTournamentQuery = (
     () =>
       new ToriiQueryBuilder()
         .withClause(
-          AndComposeClause([
-            KeysClause(
-              [
-                getModelsMapping(namespace).Tournament,
-                getModelsMapping(namespace).EntryCount,
-                getModelsMapping(namespace).Prize,
-                getModelsMapping(namespace).PrizeClaim,
-                getModelsMapping(namespace).Leaderboard,
-              ],
-              []
-            ),
+          OrComposeClause([
             MemberClause(
               getModelsMapping(namespace).Tournament,
               "id",
@@ -117,8 +107,7 @@ export const useGetTournamentQuery = (
           getModelsMapping(namespace).PrizeClaim,
           getModelsMapping(namespace).Leaderboard,
         ])
-        .includeHashedKeys()
-        .withLimit(10000),
+        .includeHashedKeys(),
     [tournamentId, namespace]
   );
 
@@ -144,29 +133,26 @@ export const useGetRegistrationsForTournamentInTokenListQuery = ({
     () =>
       new ToriiQueryBuilder()
         .withClause(
-          new ClauseBuilder()
-            .compose()
-            .and([
-              new ClauseBuilder().where(
-                getModelsMapping(namespace).Registration,
-                "tournament_id",
-                "Eq",
-                addAddressPadding(tournamentId)
-              ),
-              new ClauseBuilder().where(
-                getModelsMapping(namespace).Registration,
-                "game_token_id",
-                "In",
-                tokenIds
-              ),
-              new ClauseBuilder().where(
-                getModelsMapping(namespace).Registration,
-                "entry_number",
-                "Gt",
-                0
-              ),
-            ])
-            .build()
+          AndComposeClause([
+            MemberClause(
+              getModelsMapping(namespace).Registration,
+              "tournament_id",
+              "Eq",
+              addAddressPadding(tournamentId)
+            ),
+            MemberClause(
+              getModelsMapping(namespace).Registration,
+              "game_token_id",
+              "In",
+              tokenIds
+            ),
+            MemberClause(
+              getModelsMapping(namespace).Registration,
+              "entry_number",
+              "Gt",
+              0
+            ),
+          ]).build()
         )
         .withLimit(limit)
         .withDirection("Forward")
@@ -279,7 +265,7 @@ export const useSubscribeTournamentQuery = (
     () =>
       new ToriiQueryBuilder()
         .withClause(
-          AndComposeClause([
+          OrComposeClause([
             KeysClause(
               [
                 getModelsMapping(namespace).Tournament,
