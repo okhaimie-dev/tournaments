@@ -1,5 +1,9 @@
 name: Claude Code
 
+env:
+  SCARB_VERSION: 2.10.1
+  DOJO_VERSION: 1.5.0
+
 on:
   issue_comment:
     types: [created]
@@ -28,6 +32,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+
+      - name: Install Dojo
+        run: |
+          curl -L -o dojo-linux-x86_64.tar.gz https://github.com/dojoengine/dojo/releases/download/v${{ env.DOJO_VERSION }}/dojo_v${{ env.DOJO_VERSION }}_linux_amd64.tar.gz
+          tar -xzf dojo-linux-x86_64.tar.gz
+          sudo mv sozo /usr/local/bin/
+
+      - name: Setup Scarb
+        uses: software-mansion/setup-scarb@v1
+        with:
+          scarb-version: ${{ env.SCARB_VERSION }}
 
       - name: Run Claude Code
         id: claude

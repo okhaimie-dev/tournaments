@@ -19,3 +19,5 @@ labels: 'claude'
 
 ## Success Criteria
 <!-- How will you know when the task is complete? -->
+<!-- Available tools: sozo, scarb (Cairo/contracts only, no UI tools) -->
+<!-- Example: "sozo test should pass" or "sozo build should succeed" -->
