@@ -1,0 +1,21 @@
+---
+name: Claude Task
+about: Create a task for Claude to work on
+title: '[CLAUDE] '
+labels: 'claude'
+---
+
+## Task Description
+<!-- Be specific about what you want Claude to do -->
+
+## Relevant Files
+<!-- List specific files Claude should focus on -->
+- [ ] contracts/src/components/tournament.cairo
+- [ ] ui/src/containers/Tournament.tsx
+- [ ] Other: 
+
+## Context
+<!-- Any additional context that would help -->
+
+## Success Criteria
+<!-- How will you know when the task is complete? -->
