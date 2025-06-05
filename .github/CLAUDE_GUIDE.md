@@ -12,6 +12,7 @@
 @claude Please update the enter_tournament function in contracts/src/components/tournament.cairo 
 to validate that entry fees are paid before registration. 
 The validation should happen around line 123.
+Make sure to commit your changes and create a PR.
 ```
 
 ### Example Bad Issue:

@@ -49,3 +49,13 @@ cd contracts && sozo test
 # Run specific test
 sozo test -f test_tournament_create
 ```
+
+## GitHub Actions Instructions
+
+When working on GitHub issues:
+1. Make all necessary code changes
+2. **IMPORTANT**: Use `mcp__github_file_ops__commit_files` to commit your changes
+3. Create a pull request, don't just provide a link
+4. Example: `mcp__github_file_ops__commit_files` with files array and commit message
+
+Always commit and push changes - don't just provide PR creation links!

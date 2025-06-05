@@ -21,3 +21,4 @@ labels: 'claude'
 <!-- How will you know when the task is complete? -->
 <!-- Available tools: sozo, scarb (Cairo/contracts only, no UI tools) -->
 <!-- Example: "sozo test should pass" or "sozo build should succeed" -->
+<!-- IMPORTANT: Claude must commit changes and create a PR, not just provide a link -->
