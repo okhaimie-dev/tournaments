@@ -25,13 +25,16 @@ Claude has access to the `mcp__github_file_ops__commit_files` tool in GitHub Act
 
 - Always use `mcp__github_file_ops__commit_files` after making changes
 - Don't just provide a "Create PR" link - actually create the PR
-- The branch is already created for you (claude/issue-XXX-timestamp)
-- Commits will automatically be pushed to the branch
+- Create a branch first if needed: `claude/issue-{issue_number}-{timestamp}`
+  - Example: `claude/issue-127-20250605_124843`
+- Commits will automatically be pushed to the current branch
 
 ## Workflow
 
-1. Read and analyze the code
-2. Make necessary edits using Edit tool
-3. Run tests if requested (sozo test)
-4. **Commit changes using mcp__github_file_ops__commit_files**
-5. Create PR (not just provide a link)
+1. Create a branch (if not already on one): `mcp__github__create_branch`
+   - Branch name format: `claude/issue-{issue_number}-{timestamp}`
+2. Read and analyze the code
+3. Make necessary edits using Edit tool
+4. Run tests if requested (sozo test)
+5. **Commit changes using mcp__github_file_ops__commit_files**
+6. Create PR (not just provide a link)
