@@ -1,14 +1,34 @@
 # Claude GitHub Actions - Important Notes
 
-## Committing Changes
+## CRITICAL: Branch Protection Rules
 
-Claude has access to the `mcp__github_file_ops__commit_files` tool in GitHub Actions. This tool MUST be used to:
+The main branch is protected and requires ALL changes to be made through a pull request. Direct commits to main will fail with error 422.
 
-1. **Commit all file changes** after making edits
-2. **Push changes to the branch** automatically
-3. **NOT just provide a PR creation link**
+## Required Workflow Sequence
 
-## Example Usage
+**YOU MUST FOLLOW THIS EXACT SEQUENCE:**
+
+### Step 1: Create a New Branch (REQUIRED FIRST STEP)
+
+```json
+{
+  "tool": "mcp__github__create_branch",
+  "branch_name": "claude/issue-127-20250605_131802"
+}
+```
+
+Branch name format: `claude/issue-{issue_number}-{timestamp}`
+- `issue_number`: The GitHub issue number you're working on
+- `timestamp`: Current timestamp in format YYYYMMDD_HHMMSS
+
+### Step 2: Make Code Changes
+
+1. Read and analyze the code
+2. Make necessary edits using Edit/MultiEdit tools
+3. Add/update tests as needed
+4. Run tests if requested (sozo test)
+
+### Step 3: Commit All Changes
 
 ```json
 {
@@ -17,24 +37,62 @@ Claude has access to the `mcp__github_file_ops__commit_files` tool in GitHub Act
     "contracts/src/components/tournament.cairo",
     "contracts/src/components/tests/test_tournament.cairo"
   ],
-  "message": "feat: allow enter_tournament to be called by anyone for qualifying addresses"
+  "message": "feat: allow enter_tournament to be called by anyone for qualifying addresses\n\nDetailed description of changes..."
 }
 ```
 
-## Important Reminders
+### Step 4: Create Pull Request
 
-- Always use `mcp__github_file_ops__commit_files` after making changes
-- Don't just provide a "Create PR" link - actually create the PR
-- Create a branch first if needed: `claude/issue-{issue_number}-{timestamp}`
-  - Example: `claude/issue-127-20250605_124843`
-- Commits will automatically be pushed to the current branch
+```json
+{
+  "tool": "mcp__github__create_pull_request",
+  "title": "feat: allow enter_tournament to be called by anyone for qualifying addresses",
+  "body": "Resolves #127\n\n## Summary\nBrief description of what this PR does\n\n## Changes\n- List of specific changes made\n- Another change\n\n## Test Plan\n- How the changes were tested\n\nGenerated with [Claude Code](https://claude.ai/code)",
+  "base": "main",
+  "head": "claude/issue-127-20250605_131802"
+}
+```
 
-## Workflow
+## Common Mistakes to Avoid
 
-1. Create a branch (if not already on one): `mcp__github__create_branch`
-   - Branch name format: `claude/issue-{issue_number}-{timestamp}`
-2. Read and analyze the code
-3. Make necessary edits using Edit tool
-4. Run tests if requested (sozo test)
-5. **Commit changes using mcp__github_file_ops__commit_files**
-6. Create PR (not just provide a link)
+1. **NEVER try to commit directly to main** - This will always fail
+2. **NEVER skip the branch creation step** - You cannot commit without a branch
+3. **NEVER just provide a PR creation link** - Use the actual mcp__github__create_pull_request tool
+4. **NEVER commit before creating a branch** - The sequence matters
+
+## Complete Example Workflow
+
+```javascript
+// Step 1: ALWAYS create branch first
+await mcp__github__create_branch({
+  branch_name: "claude/issue-127-20250605_131802"
+});
+
+// Step 2: Make your code changes
+// ... edit files, add tests, etc ...
+
+// Step 3: Commit all changes
+await mcp__github_file_ops__commit_files({
+  files: [
+    "contracts/src/components/tournament.cairo",
+    "contracts/src/components/tests/test_tournament.cairo"
+  ],
+  message: "feat: allow enter_tournament to be called by anyone for qualifying addresses"
+});
+
+// Step 4: Create the pull request
+await mcp__github__create_pull_request({
+  title: "feat: allow enter_tournament to be called by anyone for qualifying addresses",
+  body: "Resolves #127\n\n## Changes\n- Modified enter_tournament function\n- Added comprehensive tests",
+  base: "main",
+  head: "claude/issue-127-20250605_131802"
+});
+```
+
+## Verification Checklist
+
+Before starting work:
+- [ ] I will create a new branch FIRST
+- [ ] I will commit to the new branch, not main
+- [ ] I will create a PR using the tool, not just provide a link
+- [ ] I will include "Resolves #XXX" in the PR body
