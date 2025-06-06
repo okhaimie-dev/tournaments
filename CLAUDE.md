@@ -1,57 +1,33 @@
 # CLAUDE.md
 
-Tournament platform built with Dojo (StarkNet) - smart contracts + React UI.
+## Development Tools
+- Scarb: 2.10.1 (Cairo/Starknet development)
+- Dojo: 1.5.0 (Gaming framework)
+- Bun: Latest (Frontend package manager)
 
-## Quick Start
+## Common Development Tasks
 
+### Contract Development
 ```bash
-# UI Development
-cd ui && bun install && bun run dev
+# Build contracts
+cd contracts && sozo build
 
-# Contract Development  
-cd contracts && sozo build && sozo test
-
-# Run linting/typecheck
-cd ui && bun run lint
-```
-
-## Key Files
-
-**Contracts:**
-- `contracts/src/components/tournament.cairo` - Main tournament logic
-- `contracts/src/components/interfaces.cairo` - Game integration interfaces
-- `contracts/src/presets/tournament.cairo` - Deployed contract
-
-**UI:**
-- `ui/src/containers/` - Main pages (Overview, CreateTournament, Tournament)
-- `ui/src/dojo/hooks/useSystemCalls.tsx` - Contract interactions
-- `ui/src/hooks/useUIStore.tsx` - UI state management
-
-## Architecture
-
-**Smart Contracts:**
-- Tournament lifecycle: Registration → Live → Submission → Finalized
-- Entry fees with configurable prize distribution
-- Token-gating and qualification requirements
-- Games implement IGameToken + IGameDetails interfaces
-
-**Frontend:**
-- Zustand for state, shadcn/ui components
-- Dojo SDK for contract queries and real-time updates
-- Multi-chain support via environment configs
-
-## Testing
-
-```bash
-# Run all contract tests
+# Run all tests
 cd contracts && sozo test
 
 # Run specific test
-sozo test -f test_tournament_create
+cd contracts && sozo test -f test_tournament_create
+
+# Format Cairo code
+cd contracts && scarb fmt
 ```
 
-## GitHub Actions Instructions
+### Frontend Development
+```bash
+# Install dependencies
+cd ui && bun install
 
+<<<<<<< HEAD
 ## CRITICAL: Branch Protection Rules
 
 The main branch is protected and requires ALL changes to be made through a pull request. Direct commits to main will fail with error 422.
@@ -148,3 +124,42 @@ Before starting work:
 - [ ] I will commit to the new branch, not main
 - [ ] I will create a PR using the tool, not just provide a link
 - [ ] I will include "Resolves #XXX" in the PR body
+=======
+# Run development server
+cd ui && bun run dev
+
+# Run linting
+cd ui && bun run lint
+```
+
+## Architecture Overview
+Tournament platform built with Dojo on StarkNet - smart contracts + React UI for managing gaming tournaments.
+
+### Key Components
+- **Smart Contracts**: Tournament lifecycle management (Registration → Live → Submission → Finalized)
+- **Frontend**: React + Zustand + shadcn/ui with Dojo SDK integration
+- **Features**: Entry fees, token-gating, qualification requirements
+
+### Project Structure
+```
+contracts/
+├── src/
+│   ├── components/
+│   │   ├── tournament.cairo      # Main tournament logic
+│   │   ├── interfaces.cairo      # Game integration interfaces
+│   │   └── models/               # Data models
+│   └── presets/
+│       └── tournament.cairo      # Deployed contract
+ui/
+├── src/
+│   ├── containers/               # Main pages
+│   ├── dojo/hooks/              # Contract interactions
+│   └── hooks/                   # State management
+```
+
+## Important Notes
+- All contracts use Cairo language with Dojo framework
+- Games must implement IGameToken + IGameDetails interfaces
+- Frontend uses Dojo SDK for real-time contract updates
+- Multi-chain support via environment configurations
+>>>>>>> be5b35eb (simplify claude.md)
