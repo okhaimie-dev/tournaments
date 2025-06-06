@@ -1031,20 +1031,17 @@ fn allowlist_gated_tournament_unauthorized() {
         );
 }
 
+// this is allowed but we need to verify the game token is minted to the qualified address
+// and not the caller address
 #[test]
-#[should_panic(
-    expected: (
-        "Tournament: Caller address is different than qualifying address", 'ENTRYPOINT_FAILED',
-    ),
-)]
 fn allowlist_gated_caller_different_from_qualification_address() {
     let contracts = setup();
 
     utils::impersonate(OWNER());
 
     // Only player1 is allowed to enter
-    let allowed_player1 = starknet::contract_address_const::<0x456>();
-    let allowed_accounts = array![allowed_player1].span();
+    let allowed_player = starknet::contract_address_const::<0x456>();
+    let allowed_accounts = array![allowed_player].span();
 
     // Create tournament gated by account list
     let entry_requirement_type = EntryRequirementType::allowlist(allowed_accounts);
@@ -1073,10 +1070,14 @@ fn allowlist_gated_caller_different_from_qualification_address() {
 
     // Owner tries to enter tournament using player1s address
     // should panic
-    let player1_qualification = Option::Some(QualificationProof::Address(allowed_player1));
-    contracts
+    let player1_qualification = Option::Some(QualificationProof::Address(allowed_player));
+    let (tournament_game_token_id, _) = contracts
         .tournament
         .enter_tournament(tournament.id, 'test_player1', OWNER(), player1_qualification);
+
+    // verify game token was minted to the qualified address
+    let game_token_owner = contracts.game.owner_of(tournament_game_token_id.into());
+    assert!(game_token_owner == allowed_player, "Game token minted to wrong owner");
 }
 
 #[test]
@@ -3335,4 +3336,295 @@ fn tournament_with_partial_submissions() {
     assert!(!registration8.has_submitted, "Player8 should not have submitted");
     assert!(!registration9.has_submitted, "Player9 should not have submitted");
     assert!(!registration10.has_submitted, "Player10 should not have submitted");
+}
+
+//
+// TESTS FOR THIRD-PARTY ENTRY FUNCTIONALITY (Issue #129)
+//
+
+/// Test that anyone can enter tournament for NFT-qualified participant
+#[test]
+fn third_party_enter_tournament_with_nft_requirement() {
+    let contracts = setup();
+    utils::impersonate(OWNER());
+
+    // Setup NFT token for gating
+    let nft_token_address = contracts.erc721.contract_address;
+
+    // Mint NFT to qualified player
+    let qualified_player = starknet::contract_address_const::<0x111>();
+    contracts.erc721.mint(qualified_player, 2);
+
+    // Create tournament gated by NFT
+    let entry_requirement_type = EntryRequirementType::token(nft_token_address);
+    let entry_requirement = EntryRequirement { entry_limit: 0, entry_requirement_type };
+
+    let tournament = contracts
+        .tournament
+        .create_tournament(
+            OWNER(),
+            test_metadata(),
+            test_schedule(),
+            test_game_config(contracts.game.contract_address),
+            Option::None,
+            Option::Some(entry_requirement),
+        );
+
+    // Start tournament entries
+    testing::set_block_timestamp(TEST_REGISTRATION_START_TIME().into());
+
+    // Third party (different from qualified player) enters tournament for qualified player
+    let third_party = starknet::contract_address_const::<0x222>();
+    utils::impersonate(third_party);
+
+    let nft_qualification = Option::Some(QualificationProof::NFT(NFTQualification { token_id: 2 }));
+
+    // Third party calls enter_tournament but provides different player_address
+    let different_address = starknet::contract_address_const::<0x333>();
+    let (game_token_id, entry_number) = contracts
+        .tournament
+        .enter_tournament(
+            tournament.id,
+            'qualified_player',
+            different_address, // This address should be ignored
+            nft_qualification,
+        );
+
+    // Verify game token was minted to the ACTUAL NFT owner, not the provided player_address
+    let game_token_owner = contracts.game.owner_of(game_token_id.into());
+    assert!(game_token_owner == qualified_player, "Game token minted to wrong owner");
+
+    // Verify tournament entry was registered correctly
+    let registration = contracts
+        .tournament
+        .get_registration(contracts.game.contract_address, game_token_id);
+    assert!(registration.tournament_id == tournament.id, "Wrong tournament ID");
+    assert!(registration.entry_number == entry_number, "Wrong entry number");
+}
+
+/// Test that anyone can enter tournament for tournament-qualified participant
+#[test]
+fn third_party_enter_tournament_with_tournament_requirement() {
+    let contracts = setup();
+    utils::impersonate(OWNER());
+
+    // Create first tournament (qualifying tournament)
+    let qualifying_tournament = create_basic_tournament(
+        contracts.tournament, contracts.game.contract_address,
+    );
+
+    // Start and complete qualifying tournament
+    testing::set_block_timestamp(TEST_REGISTRATION_START_TIME().into());
+
+    let qualified_player = starknet::contract_address_const::<0x111>();
+    utils::impersonate(qualified_player);
+
+    let (qualifying_token_id, _) = contracts
+        .tournament
+        .enter_tournament(
+            qualifying_tournament.id, 'qualified_player', qualified_player, Option::None,
+        );
+
+    // Play game
+    testing::set_block_timestamp(TEST_START_TIME().into());
+    contracts.game.end_game(qualifying_token_id, 100);
+
+    // Submit score
+    testing::set_block_timestamp(TEST_END_TIME().into() + 1);
+    contracts.tournament.submit_score(qualifying_tournament.id, qualifying_token_id, 1);
+
+    // Finalize qualifying tournament
+    let mut time = TEST_END_TIME() + MIN_SUBMISSION_PERIOD + 1;
+    testing::set_block_timestamp(time.into());
+
+    // Create second tournament gated by first tournament winners
+    utils::impersonate(OWNER());
+    let entry_requirement_type = EntryRequirementType::tournament(
+        TournamentType::winners(array![qualifying_tournament.id].span()),
+    );
+    let entry_requirement = EntryRequirement { entry_limit: 0, entry_requirement_type };
+
+    let gated_tournament = contracts
+        .tournament
+        .create_tournament(
+            OWNER(),
+            test_metadata(),
+            custom_schedule(
+                Option::Some(Period { start: (time).into(), end: (time + 1000).into() }),
+                Period { start: (time + 1000).into(), end: (time + 10000).into() },
+                MIN_SUBMISSION_PERIOD.into(),
+            ),
+            test_game_config(contracts.game.contract_address),
+            Option::None,
+            Option::Some(entry_requirement),
+        );
+
+    // Start gated tournament entries
+    testing::set_block_timestamp(time.into() + 1);
+
+    // Third party enters tournament for qualified player
+    let third_party = starknet::contract_address_const::<0x222>();
+    utils::impersonate(third_party);
+
+    let tournament_qualification = Option::Some(
+        QualificationProof::Tournament(
+            TournamentQualification {
+                tournament_id: qualifying_tournament.id, token_id: qualifying_token_id, position: 1,
+            },
+        ),
+    );
+
+    // Third party provides different player_address but game should mint to qualified player
+    let different_address = starknet::contract_address_const::<0x333>();
+    let (game_token_id, _) = contracts
+        .tournament
+        .enter_tournament(
+            gated_tournament.id,
+            'qualified_player',
+            different_address, // This should be ignored
+            tournament_qualification,
+        );
+
+    // Verify game token was minted to the actual owner of the qualifying token
+    let game_token_owner = contracts.game.owner_of(game_token_id.into());
+    assert(game_token_owner == qualified_player, 'Wrong owner');
+
+    // Verify tournament entry was registered
+    let registration = contracts
+        .tournament
+        .get_registration(contracts.game.contract_address, game_token_id);
+    assert(registration.tournament_id == gated_tournament.id, 'Wrong tournament ID');
+}
+
+/// Test that anyone can enter tournament for allowlist-qualified participant
+#[test]
+fn third_party_enter_tournament_with_allowlist_requirement() {
+    let contracts = setup();
+    utils::impersonate(OWNER());
+
+    // Create array of allowed accounts
+    let qualified_player = starknet::contract_address_const::<0x111>();
+    let allowed_accounts = array![OWNER(), qualified_player].span();
+
+    // Create tournament gated by allowlist
+    let entry_requirement_type = EntryRequirementType::allowlist(allowed_accounts);
+    let entry_requirement = EntryRequirement { entry_limit: 0, entry_requirement_type };
+
+    let tournament = contracts
+        .tournament
+        .create_tournament(
+            OWNER(),
+            test_metadata(),
+            test_schedule(),
+            test_game_config(contracts.game.contract_address),
+            Option::None,
+            Option::Some(entry_requirement),
+        );
+
+    // Start tournament entries
+    testing::set_block_timestamp(TEST_REGISTRATION_START_TIME().into());
+
+    // Third party enters tournament for allowlisted player
+    let third_party = starknet::contract_address_const::<0x222>();
+    utils::impersonate(third_party);
+
+    let allowlist_qualification = Option::Some(QualificationProof::Address(qualified_player));
+
+    // Third party provides different player_address
+    let different_address = starknet::contract_address_const::<0x333>();
+    let (game_token_id, _) = contracts
+        .tournament
+        .enter_tournament(
+            tournament.id,
+            'qualified_player',
+            different_address, // This should be ignored
+            allowlist_qualification,
+        );
+
+    // Verify game token was minted to the qualified allowlisted address
+    let game_token_owner = contracts.game.owner_of(game_token_id.into());
+    assert!(game_token_owner == qualified_player, "Game token minted to wrong owner");
+}
+
+/// Test that tournaments without entry requirements still work as before
+#[test]
+fn third_party_enter_tournament_without_requirement_uses_player_address() {
+    let contracts = setup();
+    utils::impersonate(OWNER());
+
+    // Create tournament without entry requirements
+    let tournament = create_basic_tournament(contracts.tournament, contracts.game.contract_address);
+
+    // Start tournament entries
+    testing::set_block_timestamp(TEST_REGISTRATION_START_TIME().into());
+
+    // Third party enters tournament and provides player_address
+    let third_party = starknet::contract_address_const::<0x222>();
+    utils::impersonate(third_party);
+
+    let player_address = starknet::contract_address_const::<0x333>();
+    let (game_token_id, _) = contracts
+        .tournament
+        .enter_tournament(
+            tournament.id,
+            'player',
+            player_address, // This should be used since no entry requirements
+            Option::None,
+        );
+
+    // Verify game token was minted to the provided player_address
+    let game_token_owner = contracts.game.owner_of(game_token_id.into());
+    assert!(game_token_owner == player_address, "Game token should mint to player_address");
+}
+
+/// Test entry limits still work with third-party registration
+#[test]
+#[should_panic(
+    expected: (
+        "Tournament: Maximum qualified entries reached for tournament 1", 'ENTRYPOINT_FAILED',
+    ),
+)]
+fn third_party_enter_tournament_respects_entry_limits() {
+    let contracts = setup();
+    utils::impersonate(OWNER());
+
+    // Setup NFT for gating
+    let nft_token_address = contracts.erc721.contract_address;
+
+    // Mint NFTs to different players
+    let player1 = starknet::contract_address_const::<0x111>();
+    let player2 = starknet::contract_address_const::<0x222>();
+    contracts.erc721.mint(player1, 2);
+    contracts.erc721.mint(player2, 3);
+
+    // Create tournament with entry limit of 1
+    let entry_requirement_type = EntryRequirementType::token(nft_token_address);
+    let entry_requirement = EntryRequirement { entry_limit: 1, entry_requirement_type };
+
+    let tournament = contracts
+        .tournament
+        .create_tournament(
+            OWNER(),
+            test_metadata(),
+            test_schedule(),
+            test_game_config(contracts.game.contract_address),
+            Option::None,
+            Option::Some(entry_requirement),
+        );
+
+    // Start tournament entries
+    testing::set_block_timestamp(TEST_REGISTRATION_START_TIME().into());
+
+    let third_party = starknet::contract_address_const::<0x333>();
+    utils::impersonate(third_party);
+
+    // First entry should succeed
+    let nft_qualification1 = Option::Some(
+        QualificationProof::NFT(NFTQualification { token_id: 2 }),
+    );
+    contracts.tournament.enter_tournament(tournament.id, 'player1', player1, nft_qualification1);
+
+    // attempt to enter a second time using the same qualification proof
+    // should panic
+    contracts.tournament.enter_tournament(tournament.id, 'player2', player2, nft_qualification1);
 }
