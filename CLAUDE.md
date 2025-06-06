@@ -60,7 +60,16 @@ ui/
 ```
 
 ## Important Notes
-- All contracts use Cairo language with Dojo framework
-- Games must implement IGameToken + IGameDetails interfaces
-- Frontend uses Dojo SDK for real-time contract updates
-- Multi-chain support via environment configurations
+- All contracts use Cairo language with Dojo framework. 
+- Use Context7 MCP for up to date documentation on Cairo, Starknet, and Dojo.
+- All new additions to the code should seek to maintain minimal complexity at the Starknet Contract layer. This layer of the stack should be reserved for retrieving data, blockchain specific validation (caller address, nft ownership, etc.), and saving data. All core logic should be handled by pure Cairo functions with extensive unit tests for all functionality. 
+
+## Github Actions Workflow
+
+1. Create a new branch
+   - Branch name format: `claude/issue-{issue_number}`
+2. Commit all changes to new branch
+3. All new functions should be accompanied by exhaustive tests
+4. Verify all tests pass using `cd contracts && sozo test`
+5. Run `cd contracts && scarb fmt` to format contracts
+6. Only when all tests are passing should a PR be created.
