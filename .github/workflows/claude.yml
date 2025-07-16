@@ -48,5 +48,7 @@ jobs:
         id: claude
         uses: anthropics/claude-code-action@beta
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          additional_permissions: |
+            actions: read
           allowed_tools: "Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git checkout:*),Bash(git branch:*),Bash(git status),Bash(git diff:*),Bash(git log:*),Bash(git pull:*),Bash(cd:*),Bash(ls:*),Bash(find:*),Bash(grep:*),Bash(cat:*),Bash(pwd),Bash(sozo build),Bash(sozo test),Bash(sozo test -f *),Bash(scarb fmt),Bash(scarb build),Bash(bun install),Bash(bun run:*),Bash(bun test:*),Bash(npm install),Bash(npm run:*),Edit,View"
